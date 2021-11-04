@@ -9,6 +9,7 @@
 #include "../include/define.h"
 #include "../include/ec_dsa.h"
 #include "../uint256_t/uint256_t.h"
+#include "../sha256/include/SHA256.h"
 
 const uint256_t field_modulo = FIELD_MODULO;
 const uint256_t subgroup_order = SUBGROUP_ORDER;
@@ -34,6 +35,12 @@ uint256_t safe_random(const uint256_t& a, const uint256_t& b) {
 
     const uint256_t modulo = FIELD_MODULO;
     return x % modulo;
+}
+
+uint256_t hash_message(const std::string& message) {
+	SHA256 sha;
+	sha.update(message);
+    return uint256_t(SHA256::toString(sha.digest()));
 }
 
 static uint256_t inverse_modulo(const uint256_t& x, const uint256_t& modulo) {
@@ -91,8 +98,7 @@ static std::pair<uint256_t*, uint256_t*> scalar_mult(uint256_t& k, std::pair<uin
 
 
 std::pair<uint256_t, uint256_t> sign(std::string& message, uint256_t& private_key) {
-    // uint256_t hashed = hash_message(message);
-
+    uint256_t hashed = hash_message(message);
     uint256_t r = 0x0;
     uint256_t s = 0x0;
     while (!r || !s) {
@@ -110,7 +116,7 @@ bool verify(std::string& message,
             std::pair<uint256_t*, uint256_t*> public_key) {
     
     uint256_t r = siganture.first, s = siganture.second;
-    // uint256_t hashed = hash_message(message);
+    uint256_t hashed = hash_message(message);
 
     uint256_t inv_s = inverse_modulo(s, subgroup_order);
     uint256_t u1 = (inv_s * hashed) % subgroup_order;
