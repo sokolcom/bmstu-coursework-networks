@@ -13,13 +13,16 @@
 
 const uint256_t field_modulo = FIELD_MODULO;
 const uint256_t subgroup_order = SUBGROUP_ORDER;
-const std::pair<uint256_t*, uint256_t*> base_point = std::make_pair(
-    &uint256_t(BASE_POINT_X),
-    &uint256_t(BASE_POINT_Y)
+uint256_t base_point_x = uint256_t(BASE_POINT_X);
+uint256_t base_point_y = uint256_t(BASE_POINT_Y);
+
+std::pair<uint256_t*, uint256_t*> base_point = std::make_pair(
+    &base_point_x,
+    &base_point_y
 );
 
 
-uint256_t safe_random(uint256_t& a, uint256_t& b) {
+uint256_t safe_random(const uint256_t& a, const uint256_t& b) {
     uint8_t buffer[BYTES_PER_256_BIT] = { 0 };
     int8_t code = RAND_bytes(buffer, 32);
     if (code != 1) {
@@ -63,7 +66,7 @@ static std::pair<uint256_t*, uint256_t*> add(std::pair<uint256_t*, uint256_t*>& 
         slope = (y1 - y2) * inverse_modulo(x1 - x2, field_modulo);
     }
 
-    uint256_t x3 = (slope * slope - CURVE_A - x1 - x2) % field_modulo;
+    uint256_t x3 = (slope * slope - _CURVE_A - x1 - x2) % field_modulo;
     uint256_t y3 = (y1 + slope * (x3 - x1));
     y3 = -y3 % field_modulo;
     return std::make_pair(&x3, &y3);
@@ -88,13 +91,13 @@ static std::pair<uint256_t*, uint256_t*> scalar_mult(uint256_t& k, std::pair<uin
 }
 
 
-std::pair<uint256_t&, uint256_t&> sign(std::string& message, uint256_t& private_key) {
+std::pair<uint256_t, uint256_t> sign(std::string& message, uint256_t& private_key) {
     // uint256_t hashed = hash_message(message);
 
     uint256_t r = 0x0;
     uint256_t s = 0x0;
     while (!r || !s) {
-        uint256_t k = cfg.safe_random(uint256_1, subgroup_order);
+        uint256_t k = safe_random(uint256_1, subgroup_order);
         std::pair<uint256_t*, uint256_t*> point =  scalar_mult(k, base_point);
         uint256_t r = *point.first % subgroup_order;
         uint256_t s = ((hashed + r * private_key) * inverse_modulo(k, subgroup_order)) % subgroup_order;
@@ -105,7 +108,7 @@ std::pair<uint256_t&, uint256_t&> sign(std::string& message, uint256_t& private_
 
 bool verify(std::string& message, 
             std::pair<uint256_t&, uint256_t&> siganture,
-            std::pair<uint256_t&, uint256_t&> public_key) {
+            std::pair<uint256_t*, uint256_t*> public_key) {
     
     uint256_t r = siganture.first, s = siganture.second;
     // uint256_t hashed = hash_message(message);
