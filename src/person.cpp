@@ -21,13 +21,11 @@
 
 using namespace std;
 
-int main() {
-    uint256_t person_private_key = uint256_t(PERSON_PRIVATE_KEY);
-    pair<uint256_t, uint256_t> car_public_key = make_pair(CAR_PUBLIC_KEY_FIRST, CAR_PUBLIC_KEY_SECOND);
-    int person_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+void send_request() {
+	int person_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     
     if (person_socket < 0) {
-        return ERROR;
+        //return ERROR;
     }
 
     struct sockaddr_in server_addr;
@@ -36,7 +34,7 @@ int main() {
 	server_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
 	if (connect(person_socket, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0) {
-        return ERROR;
+        //return ERROR;
     }
 
 	//printf("enter your Name: \n");
@@ -59,6 +57,46 @@ int main() {
 
 	unsigned int server_addr_len = sizeof(server_addr);
 	if (recvfrom(person_socket, message, MSG_LEN, 0, (struct sockaddr*) &server_addr, &server_addr_len) == -1) {
+        //return ERROR;
+    }
+
+    std::string handshake_response_msg = std::string(message); 
+    auto js = nlohmann::json::parse(handshake_response_msg);
+	std::cout << std::string(js.at("random_number")).c_str() << " " << js.at("hash") << std::endl;
+	std::cout << handshake_response_msg;
+    // decode handshake response
+
+	close(person_socket);
+}
+
+int main() {
+    uint256_t person_private_key = uint256_t(PERSON_PRIVATE_KEY);
+    pair<uint256_t, uint256_t> car_public_key = make_pair(CAR_PUBLIC_KEY_FIRST, CAR_PUBLIC_KEY_SECOND);
+	send_request();
+	send_request();
+	/*
+    int person_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    
+    if (person_socket < 0) {
+        return ERROR;
+    }
+
+    struct sockaddr_in server_addr;
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(PORT);
+	server_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+
+	if (connect(person_socket, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0) {
+        return ERROR;
+    }
+
+    char message[MSG_LEN];
+	std::string handshake_message = "{\"auth_token\": " + std::string(USER_TOKEN) + ", chapter: \"handshake\"}";
+    const char *handhake_c_string = handshake_message.c_str();
+	sendto(person_socket, handhake_c_string, strlen(handhake_c_string), 0, (struct sockaddr*) &server_addr, sizeof(server_addr));
+
+	unsigned int server_addr_len = sizeof(server_addr);
+	if (recvfrom(person_socket, message, MSG_LEN, 0, (struct sockaddr*) &server_addr, &server_addr_len) == -1) {
         return ERROR;
     }
 
@@ -67,6 +105,9 @@ int main() {
 	std::cout << std::string(js.at("random_number")).c_str() << " " << js.at("hash") << std::endl;
 	std::cout << handshake_response_msg;
     // decode handshake response 
+
+	close(person_socket);
+	person_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	std::string response_message = "{\"auth_token\": " + std::string(USER_TOKEN) + ", chapter: \"response\"}";
     const char *response_c_string = handshake_message.c_str();
@@ -82,6 +123,7 @@ int main() {
 	std::cout << std::string(js.at("random_number")).c_str() << " " << js.at("hash") << std::endl;
 
 	close(person_socket);
+	*/
 	return 0;
 }
 
