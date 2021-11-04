@@ -1,48 +1,89 @@
 #include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <iostream>
+#include <thread>
+#include <vector>
+#include <queue>
+#include <mutex>
+#include <condition_variable>
+#include <string>
 
 #define PORT 8888
-#define ERROR 1
-#define 
+#define SERVER_IP "127.0.0.1"
+#define MSG_LEN 1024
+#define ROOT "/Users/vlad/Downloads/coursework-networks"
 
-int main() {
-    int carSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    
-    if (carSocket < 0) {
-        return ERROR;
-    }
+using namespace std;
 
-    struct sockaddr_in serverAddr;
-	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_port = htons(PORT);
-	serverAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+void perror_and_exit(std::string err_msg, size_t exit_code)
+{
+	perror(err_msg.c_str());
+	exit(exit_code);
+}
 
-	if (connect(carSocket, (struct sockaddr*) &serverAddr, sizeof(serverAddr)) < 0) {
-        return ERROR;
-    }
+int main()
+{
+	struct sockaddr_in addr, client_addr;
 
-	printf("enter your Name: \n");
-	cin >> userName;
+	int listener = socket(AF_INET, SOCK_STREAM, 0);
+	if(listener < 0)
+		perror_and_exit("socket()", 1);
 
-	char message[MSG_LEN];
-	printf("enter url: \n");
-	scanf("%s", message);
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(PORT);
+	addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-	string mes = generateGetMessage(message);
-	const char * msg = mes.c_str();
+	if (::bind(listener, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+		perror_and_exit("bind()", 2);
+	}
 
-	printf("Sending message...\n\n");
+	listen(listener, 10);
 
-	cout << "msg " << msg << "\n";
-	sendto(clientSock, msg, strlen(msg), 0, (struct sockaddr*) &serverAddr, sizeof(serverAddr));
+		printf("Server is listening on %s:%d...\n", SERVER_IP, PORT);
+	//ThreadPool tp;
+	while(1)
+	{
 
-	unsigned int sAddrlen = sizeof(serverAddr);
-	if (recvfrom(clientSock, message, MSG_LEN, 0, (struct sockaddr*) &serverAddr, &sAddrlen) == -1)
-		perror_and_exit("recvfrom", 1);
-	std::cout << message;
+		int sock;
+		int bytes_read;
+		char *buf = (char*)malloc(MSG_LEN);
+		socklen_t cli_addr_size = sizeof(client_addr);
 
-	close(clientSock);
+		sock = accept(listener, (struct sockaddr*) &client_addr, &cli_addr_size);
+		if(sock < 0)
+			perror_and_exit("accept()", 3);
+
+		bytes_read = recv(sock, buf, MSG_LEN, 0);
+		if (bytes_read < 0)
+		{
+			printf("Recv failed");
+			close(sock);
+			continue ;
+		}
+		if (bytes_read == 0)
+		{
+			puts("Client disconnected upexpectedly.");
+			close(sock);
+			continue ;
+		}
+		buf[bytes_read] = '\0';
+		cout << "buf" << buf << "\n";
+		char tst[MSG_LEN];
+		strcpy(tst, buf);
+
+		std::string s = "{ \"random_number\": \"fook\", \"hash\": \"s123435422423423\"}";
+		send(sock, s.c_str(), s.size(), 0);
+		//tp.queueWork(sock, tst);
+
+		free(buf);
+	}
+	close(listener);
 	return 0;
 }

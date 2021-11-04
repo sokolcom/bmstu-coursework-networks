@@ -9,6 +9,7 @@
 #include <utility>
 #include <nlohmann/json.hpp>
 #include <openssl/rand.h>
+#include <iostream>
 
 #define PORT 8888
 #define MSG_LEN 1024
@@ -60,7 +61,9 @@ int main() {
     }
 
     std::string handshake_response_msg = std::string(message); 
-    nlohmann::json js = handshake_response_msg;
+    auto js = nlohmann::json::parse(handshake_response_msg);
+	std::cout << std::string(js.at("random_number")).c_str() << " " << js.at("hash") << std::endl;
+	std::cout << handshake_response_msg;
     // decode handshake response 
 
 	close(person_socket);
