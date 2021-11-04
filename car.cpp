@@ -55,20 +55,24 @@ int main()
 		int bytes_read;
 		char *buf = (char*)malloc(MSG_LEN);
 		socklen_t cli_addr_size = sizeof(client_addr);
-
+		std::cout << "here1" << std::endl;
 		sock = accept(listener, (struct sockaddr*) &client_addr, &cli_addr_size);
-		if(sock < 0)
+		if(sock < 0) {
+			std::cout << "here4334" << std::endl;
 			perror_and_exit("accept()", 3);
-
+		}
+		std::cout << "here2" << std::endl;
 		bytes_read = recv(sock, buf, MSG_LEN, 0);
 		if (bytes_read < 0)
 		{
+			std::cout << "here3" << std::endl;
 			printf("Recv failed");
 			close(sock);
 			continue ;
 		}
 		if (bytes_read == 0)
 		{
+			std::cout << "here4" << std::endl;
 			puts("Client disconnected upexpectedly.");
 			close(sock);
 			continue ;
@@ -77,11 +81,11 @@ int main()
 		cout << "buf" << buf << "\n";
 		char tst[MSG_LEN];
 		strcpy(tst, buf);
-
+		std::cout << "here5" << std::endl;
 		std::string s = "{ \"random_number\": \"fook\", \"hash\": \"s123435422423423\"}";
 		send(sock, s.c_str(), s.size(), 0);
 		//tp.queueWork(sock, tst);
-
+		std::cout << "here6" << std::endl;
 		free(buf);
 	}
 	close(listener);

@@ -121,7 +121,9 @@ bool verify(std::string& message,
     uint256_t inv_s = inverse_modulo(s, subgroup_order);
     uint256_t u1 = (inv_s * hashed) % subgroup_order;
     uint256_t u2 = (inv_s * r) % subgroup_order;
-    std::pair<uint256_t*, uint256_t*> point = add(scalar_mult(u1, base_point), scalar_mult(u2, public_key));
+    std::pair<uint256_t*, uint256_t*> mult_1 = scalar_mult(u1, base_point);
+    std::pair<uint256_t*, uint256_t*> mult_2 = scalar_mult(u2, public_key);
+    std::pair<uint256_t*, uint256_t*> point = add(mult_1, mult_2);
 
     return (r % subgroup_order) == (*point.first % subgroup_order);
 

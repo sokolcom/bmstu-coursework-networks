@@ -53,7 +53,7 @@ int main() {
 
 	//cout << "msg " << msg << "\n";
     char message[MSG_LEN];
-	std::string handshake_message = "{\"auth_token\": " + USER_TOKEN + ", chapter: \"handshake\"";
+	std::string handshake_message = "{\"auth_token\": " + std::string(USER_TOKEN) + ", chapter: \"handshake\"}";
     const char *handhake_c_string = handshake_message.c_str();
 	sendto(person_socket, handhake_c_string, strlen(handhake_c_string), 0, (struct sockaddr*) &server_addr, sizeof(server_addr));
 
@@ -68,16 +68,17 @@ int main() {
 	std::cout << handshake_response_msg;
     // decode handshake response 
 
-	std::string response_message = "{\"auth_token\": " + USER_TOKEN + ", chapter: \"response\"";
+	std::string response_message = "{\"auth_token\": " + std::string(USER_TOKEN) + ", chapter: \"response\"}";
     const char *response_c_string = handshake_message.c_str();
 	sendto(person_socket, response_c_string, strlen(response_c_string), 0, (struct sockaddr*) &server_addr, sizeof(server_addr));
-
+	std::cout << "first" << std::endl;
 	if (recvfrom(person_socket, message, MSG_LEN, 0, (struct sockaddr*) &server_addr, &server_addr_len) == -1) {
         return ERROR;
     }
-
+	std::cout << "second" << std::endl;
 	std::string response_response_msg = std::string(message);
 	auto js_response = nlohmann::json::parse(response_response_msg);
+	std::cout << js_response << std::endl;
 	std::cout << std::string(js.at("random_number")).c_str() << " " << js.at("hash") << std::endl;
 
 	close(person_socket);
