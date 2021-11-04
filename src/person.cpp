@@ -17,6 +17,7 @@
 #define PERSON_PRIVATE_KEY "0x631ee57d7cb6801890415ccc4622a12ddc0d0025ef087ce0e2798941473d142"
 #define CAR_PUBLIC_KEY_FIRST "0x7630498e5e4df030aedb1b0ea44ee1ce2a323427aaf2a959d9d31e39da843361"
 #define CAR_PUBLIC_KEY_SECOND "0x51859ccdf5567141f640eeefae2eddc4e1b1696149d8564a9a4ae7f756f32dc7"
+#define USER_TOKEN "666"
 
 using namespace std;
 
@@ -52,8 +53,9 @@ int main() {
 
 	//cout << "msg " << msg << "\n";
     char message[MSG_LEN];
-    const char *msg_string = "sdsds";//std::string("sdsdsd").c_str();
-	sendto(person_socket, msg_string, strlen(msg_string), 0, (struct sockaddr*) &server_addr, sizeof(server_addr));
+	std::string handshake_message = "{\"auth_token\": " + USER_TOKEN + ", chapter: \"handshake\"";
+    const char *handhake_c_string = handshake_message.c_str();
+	sendto(person_socket, handhake_c_string, strlen(handhake_c_string), 0, (struct sockaddr*) &server_addr, sizeof(server_addr));
 
 	unsigned int server_addr_len = sizeof(server_addr);
 	if (recvfrom(person_socket, message, MSG_LEN, 0, (struct sockaddr*) &server_addr, &server_addr_len) == -1) {
@@ -66,6 +68,22 @@ int main() {
 	std::cout << handshake_response_msg;
     // decode handshake response 
 
+	std::string response_message = "{\"auth_token\": " + USER_TOKEN + ", chapter: \"response\"";
+    const char *response_c_string = handshake_message.c_str();
+	sendto(person_socket, response_c_string, strlen(response_c_string), 0, (struct sockaddr*) &server_addr, sizeof(server_addr));
+
+	if (recvfrom(person_socket, message, MSG_LEN, 0, (struct sockaddr*) &server_addr, &server_addr_len) == -1) {
+        return ERROR;
+    }
+
+	std::string response_response_msg = std::string(message);
+	auto js_response = nlohmann::json::parse(response_response_msg);
+	std::cout << std::string(js.at("random_number")).c_str() << " " << js.at("hash") << std::endl;
+
 	close(person_socket);
 	return 0;
+}
+
+void handshake() {
+
 }

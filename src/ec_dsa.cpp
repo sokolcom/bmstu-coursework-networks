@@ -10,7 +10,6 @@
 #include "../include/ec_dsa.h"
 #include "../uint256_t/uint256_t.h"
 
-
 const uint256_t field_modulo = FIELD_MODULO;
 const uint256_t subgroup_order = SUBGROUP_ORDER;
 uint256_t base_point_x = uint256_t(BASE_POINT_X);
