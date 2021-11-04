@@ -14,7 +14,7 @@ OBJ_SRC = $(patsubst %.cpp, %.o, $(wildcard $(SRC_CXX)))
 
 
 app.out: $(OBJ_UINT256) $(OBJ_SHA256) $(OBJ_SRC) 
-	$(CC) -o $@ $^
+	$(CC) -o $@ $^ -lcrypto
 
 $(OBJ_SRC):		CXXFLAGS += -lcrypto
 $(OBJ_UINT256): CXXFLAGS += -fPIC
