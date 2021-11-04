@@ -1,5 +1,5 @@
 CC = g++
-CXXFLAGS = -std=c++11 -Wall -Werror
+CXXFLAGS = -std=c++11 #-Wall -Werror
 
 
 SRC_UINT256 = $(wildcard uint256_t/*.cpp)
@@ -10,9 +10,9 @@ OBJ_SRC = $(patsubst %.cpp, %.o, $(wildcard $(SRC_CXX)))
 
 
 app.out: $(OBJ_UINT256) $(OBJ_SRC) 
-	$(CC) -o $@ $^ -lcrypto
+	$(CC) -o $@ $^
 
-$(OBJ_SRC):		CXXFLAGS += -lcrypto
+#$(OBJ_SRC):		CXXFLAGS += -lcrypto
 $(OBJ_UINT256): CXXFLAGS += -fPIC
 
 

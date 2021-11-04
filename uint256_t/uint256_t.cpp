@@ -765,7 +765,7 @@ std::ostream & operator<<(std::ostream & stream, const uint256_t & rhs){
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
+/*
 std::istream &operator>>(std::istream &stream, uint256_t &rhs) {
     std::string hexstring;
     stream >> hexstring;
@@ -773,6 +773,7 @@ std::istream &operator>>(std::istream &stream, uint256_t &rhs) {
     rhs = std::move(temp);
     return stream;
 }
+*/
 
 uint256_t uint256_t::powmod(uint256_t power, const uint256_t &modulo) const {
     uint256_t a = *this;
