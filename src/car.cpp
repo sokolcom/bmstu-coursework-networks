@@ -16,7 +16,7 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include <set>
-#include "include/ec_dsa.h"
+#include "../include/ec_dsa.h"
 
 #define PORT 8888
 #define SERVER_IP "127.0.0.1"
