@@ -118,8 +118,8 @@ static std::pair<uint256_t, uint256_t> scalar_mult(uint256_t k, std::pair<uint25
     return r0;
 }
 
-std::pair<uint256_t, uint256_t> sign(std::string& message, uint256_t private_key) {
-    uint256_t hashed = hash_message(message) % subgroup_order;
+std::pair<uint256_t, uint256_t> sign(uint256_t hashed, uint256_t private_key) {
+    hashed = hashed % subgroup_order;
     uint256_t r = 0x0;
     uint256_t s = 0x0;
     while ((!r) || (!s)) {
@@ -137,12 +137,12 @@ std::pair<uint256_t, uint256_t> sign(std::string& message, uint256_t private_key
     return std::make_pair(r, s);
 }
 
-bool verify(std::string& message, 
+bool verify(uint256_t hashed, 
             std::pair<uint256_t, uint256_t> siganture,
             std::pair<uint256_t, uint256_t> public_key) {
     
     uint256_t r = siganture.first, s = siganture.second;
-    uint256_t hashed = hash_message(message) % subgroup_order;
+    hashed = hashed % subgroup_order;
     
     uint256_t inv_s = inverse_modulo(s, subgroup_order);
     uint256_t u1 = inv_s.mulmod(hashed, subgroup_order);

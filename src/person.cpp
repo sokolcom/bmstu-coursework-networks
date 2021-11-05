@@ -10,7 +10,7 @@
 #include <nlohmann/json.hpp>
 #include <openssl/rand.h>
 #include <iostream>
-#include <../include/ec_dsa.h>
+#include "../include/ec_dsa.h"
 
 #define PORT 8888
 #define MSG_LEN 1024
@@ -85,7 +85,7 @@ int main() {
 										"\"r\": \"" + person_signature.first.str(16,64) + "\"," 
 								  		"\"s\": \"" + person_signature.second.str(16,64) + "\""
 							  			"} "
-									"}"
+									"}";
     const char *response_c_string = response_message.c_str();
 	sendto(person_socket, response_c_string, strlen(response_c_string), 0, (struct sockaddr*) &server_addr, sizeof(server_addr));
 	if (recvfrom(person_socket, new_message, MSG_LEN, 0, (struct sockaddr*) &server_addr, &server_addr_len) == -1) {

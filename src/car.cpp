@@ -205,7 +205,7 @@ int main()
 				result = "false";
 			}
 
-			std::string s = "{ \"success\": " + result + " }";
+			s = "{ \"success\": " + result + " }";
 			std::cout << s << std::endl;
 			send(sock, s.c_str(), s.size(), 0);
 
