@@ -72,6 +72,7 @@ int main() {
 	std::string response_response_msg = std::string(new_message);
 	auto js_response = nlohmann::json::parse(response_response_msg);
 	std::cout << js_response << std::endl;
+
 	bool success = js_response.at("success");
 	if (success) {
 		std::cout << "car opened" << std::endl;

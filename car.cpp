@@ -16,13 +16,15 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include <set>
-#include "../include/ec_dsa.h"
+#include "include/ec_dsa.h"
 
 #define PORT 8888
 #define SERVER_IP "127.0.0.1"
 #define MSG_LEN 1024
+
 #define ROOT "/Users/vlad/Downloads/coursework-networks"
 #define CAR_PRIVATE_KEY "0x2572c1e1fc6f2f517e6dffc867b8d6abc3c920b28eaf8a8ec7c33e38c58d04"
+
 
 using namespace std;
 
