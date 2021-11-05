@@ -16,11 +16,13 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include <set>
+#include "../include/ec_dsa.h"
 
 #define PORT 8888
 #define SERVER_IP "127.0.0.1"
 #define MSG_LEN 1024
 #define ROOT "/Users/vlad/Downloads/coursework-networks"
+#define CAR_PRIVATE_KEY "0x2572c1e1fc6f2f517e6dffc867b8d6abc3c920b28eaf8a8ec7c33e38c58d04"
 
 using namespace std;
 
@@ -153,9 +155,17 @@ int main()
 		if (chapter == "handshake") {
 			std::cout << "handshake handling" << std::endl;
 			user_sessions.insert(user_token);
-			std::string nonce = "coco-jambo";
-			std::string hash = "s123435422423423";
-			std::string s = "{ \"nonce\": \"" + nonce + "\", \"hash\": \"" + hash + "\"}";
+			std::string nonce = safe_random(uint256_1, uint256_max).str(16, 64);
+			std::string nonce_hash = hash_message(nonce).str(16, 64);
+			std::pair<uint256_t, uint256_t> signature = sign(nonce_hash, uint256_t(CAR_PRIVATE_KEY));
+			std::string r = signature.first.str(16,64);
+			std::string s = "{"
+							"\"nonce\": \"" + nonce_hash + "\","
+							"\"signature\": {"
+								"\"r\": \"\"," 
+								"\"s\": \"\""
+							  "}"
+							"}";
 			send(sock, s.c_str(), s.size(), 0);
 		} else if (chapter == "response") {
 			std::cout << "response handling" << std::endl;

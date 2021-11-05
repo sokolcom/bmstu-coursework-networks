@@ -22,7 +22,7 @@ std::pair<uint256_t*, uint256_t*> base_point = std::make_pair(
 );
 
 
-uint256_t safe_random(const uint256_t& a, const uint256_t& b) {
+uint256_t safe_random(const uint256_t a, const uint256_t b) {
     uint8_t buffer[BYTES_PER_256_BIT] = { 0 };
     int8_t code = RAND_bytes(buffer, 32);
     if (code != 1) {
@@ -97,7 +97,7 @@ static std::pair<uint256_t*, uint256_t*> scalar_mult(uint256_t& k, std::pair<uin
 }
 
 
-std::pair<uint256_t, uint256_t> sign(std::string& message, uint256_t& private_key) {
+std::pair<uint256_t, uint256_t> sign(std::string& message, uint256_t private_key) {
     uint256_t hashed = hash_message(message);
     uint256_t r = 0x0;
     uint256_t s = 0x0;

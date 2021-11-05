@@ -53,8 +53,9 @@ int main() {
     std::string handshake_response_msg = std::string(message); 
     auto js = nlohmann::json::parse(handshake_response_msg);
 	std::string nonce = js.at("nonce");
-	std::string hash = js.at("hash");
-	std::cout << "person received challenge: " << nonce << " " << hash << std::endl;
+	std::string r = js.at("signature").at("r");
+	std::string s = js.at("signature").at("s");
+	std::cout << "person received challenge: " << nonce << " " << r << " " << s << std::endl;
 	std::cout << handshake_response_msg;
 
     // decode handshake response
