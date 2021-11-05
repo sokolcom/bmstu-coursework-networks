@@ -24,7 +24,8 @@
 
 #define ROOT "/Users/vlad/Downloads/coursework-networks"
 #define CAR_PRIVATE_KEY "0x2572c1e1fc6f2f517e6dffc867b8d6abc3c920b28eaf8a8ec7c33e38c58d04"
-
+#define PERSON_PUBLIC_KEY_FIRST "0x5085c9e4f84d48d3d1f93e2c8511994c572b3a5baabe5834e0093f971aa0f891"
+#define PERSON_PUBLIC_KEY_SECOND "0x66cba7d26a1ee0b05541193967470a4d5b5bce4e643c41af98d38698096bba43"
 
 using namespace std;
 
@@ -116,7 +117,7 @@ int main()
 		if (bytes_read < 0)
 		{
 			std::cout << "here3 " << bytes_read << std::endl;
-			printf("Recv failed");
+			printf("SERVER: Recv failed");
 			close(sock);
 			is_executing = false;
 			continue;
@@ -124,7 +125,7 @@ int main()
 		if (bytes_read == 0)
 		{
 			std::cout << "here4" << std::endl;
-			puts("Client disconnected upexpectedly.");
+			puts("SERVER: Client disconnected upexpectedly.");
 			close(sock);
 			accept_connection(listener, client_addr);
 			continue ;
@@ -140,14 +141,14 @@ int main()
 		std::string chapter = js.at("chapter");
 		std::cout << "car - " << user_token << " " << chapter << std::endl;
 		if (!is_user_authorized(user_token)) {
-			puts("Not authorized");
+			puts("SERVER: Not authorized");
 			close(sock);
 			accept_connection(listener, client_addr);
 			continue;
 		}
 
 		if (!is_chapter_correct(user_token, chapter)) {
-			puts("Invalid chapter");
+			puts("SERVER: Invalid chapter");
 			std::cout << chapter << std::endl;
 			close(sock);
 			accept_connection(listener, client_addr);
@@ -155,23 +156,25 @@ int main()
 		}
 
 		if (chapter == "handshake") {
-			std::cout << "handshake handling" << std::endl;
+			std::cout << "SERVER: handshake handling" << std::endl;
 			user_sessions.insert(user_token);
 			std::string nonce = safe_random(uint256_1, uint256_max).str(16, 64);
 			std::string nonce_hash = hash_message(nonce).str(16, 64);
 			std::pair<uint256_t, uint256_t> signature = sign(nonce_hash, uint256_t(CAR_PRIVATE_KEY));
 			std::string r = signature.first.str(16,64);
-			std::string s = "{"
+			std::string s = signature.second.str(16,64);
+			std::cout << "R: " << r << std::endl;
+			std::cout << "S: " << s << std::endl;
+			std::string m = "{"
 							"\"nonce\": \"" + nonce_hash + "\","
 							"\"signature\": {"
-								"\"r\": \"\"," 
-								"\"s\": \"\""
-							  "}"
+								"\"r\": \"" + r + "\"," 
+								"\"s\": \"" + s + "\""
+							  "} "
 							"}";
-			send(sock, s.c_str(), s.size(), 0);
+			send(sock, m.c_str(), m.size(), 0);
 		} else if (chapter == "response") {
-			std::cout << "response handling" << std::endl;
-			std::cout << "car opened" << std::endl;
+			std::cout << "SERVER: response handling" << std::endl;
 			for(auto it = user_sessions.begin(); it != user_sessions.end(); ) {
 				if(*it == user_token) {
 					it = user_sessions.erase(it);
@@ -182,19 +185,35 @@ int main()
     		}
 
 			std::string nonce = js.at("nonce");
-			std::string hash = js.at("hash");
-			std::string success = "true";
-			std::string s = "{ \"success\": " + success + " }";
+			std::string r = js.at("signature").at("r");
+			std::string s = js.at("signature").at("s");
+
+			uint256_t nonce_number = uint256_t(nonce);
+			uint256_t r_number = uint256_t(r);
+			uint256_t s_number = uint256_t(s);
+
+			pair<uint256_t, uint256_t> person_public_key = make_pair(PERSON_PUBLIC_KEY_FIRST, PERSON_PUBLIC_KEY_SECOND);
+			
+			bool is_verified = verify(nonce_number, make_pair(r_number, s_number), person_public_key);
+
+			std::string result;
+			if (is_verified) {
+				std::cout << "SERVER: Verified! Car opened" << std::endl;
+				result = "true";
+			} else {
+				puts("SERVER: Not verified Response, car closed!");
+				result = "false";
+			}
+
+			std::string s = "{ \"success\": " + result + " }";
 			std::cout << s << std::endl;
 			send(sock, s.c_str(), s.size(), 0);
 
-			puts("Succesfully finished");
 			close(sock);
 			accept_connection(listener, client_addr);
 			continue;
-
 		} else {
-			puts("Invalid chapter");
+			puts("SERVER: Invalid chapter");
 			close(sock);
 			accept_connection(listener, client_addr);
 			continue;

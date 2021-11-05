@@ -10,6 +10,7 @@
 #include <nlohmann/json.hpp>
 #include <openssl/rand.h>
 #include <iostream>
+#include <../include/ec_dsa.h>
 
 #define PORT 8888
 #define MSG_LEN 1024
@@ -55,14 +56,36 @@ int main() {
 	std::string nonce = js.at("nonce");
 	std::string r = js.at("signature").at("r");
 	std::string s = js.at("signature").at("s");
-	std::cout << "person received challenge: " << nonce << " " << r << " " << s << std::endl;
+	std::cout << "CLIENT: person received challenge: " << nonce << " " << r << " " << s << std::endl;
 	std::cout << handshake_response_msg;
 
+	uint256_t nonce_number = uint256_t(nonce);
+	uint256_t r_number = uint256_t(r);
+	uint256_t s_number = uint256_t(s);
+
+	bool is_verified = verify(nonce_number, make_pair(r_number, s_number), car_public_key);
+
+	if (!is_verified) {
+		std::cout << "CLIENT: Challenge not verified" << std::endl;
+		close(person_socket);
+		return ERROR;
+	}
+
+	std::pair<uint256_t, uint256_t> person_signature = sign(nonce_number, uint256_t(PERSON_PRIVATE_KEY));
+	
     // decode handshake response
 
 	char new_message[MSG_LEN];
 
-	std::string response_message = "{\"auth_token\": \"" + std::string(USER_TOKEN) + "\", \"chapter\": \"response\", \"nonce\": \"fook\", \"hash\": \"abracadabra\"}";
+	std::string response_message = "{"
+									"\"auth_token\": \"" + std::string(USER_TOKEN) + "\","
+									"\"chapter\": \"response\","
+									"\"nonce\": \"" + nonce + "\","
+									"\"signature\": {"
+										"\"r\": \"" + person_signature.first.str(16,64) + "\"," 
+								  		"\"s\": \"" + person_signature.second.str(16,64) + "\""
+							  			"} "
+									"}"
     const char *response_c_string = response_message.c_str();
 	sendto(person_socket, response_c_string, strlen(response_c_string), 0, (struct sockaddr*) &server_addr, sizeof(server_addr));
 	if (recvfrom(person_socket, new_message, MSG_LEN, 0, (struct sockaddr*) &server_addr, &server_addr_len) == -1) {
@@ -75,9 +98,9 @@ int main() {
 
 	bool success = js_response.at("success");
 	if (success) {
-		std::cout << "car opened" << std::endl;
+		std::cout << "CLIENT: car opened!" << std::endl;
 	} else {
-		std::cout << "car not opened" << std::endl;
+		std::cout << "CLIENT: car not opened!" << std::endl;
 	}
 
 	close(person_socket);
