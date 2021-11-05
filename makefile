@@ -14,7 +14,7 @@ OBJ_SRC = $(patsubst %.cpp, %.o, $(wildcard $(SRC_CXX)))
 
 
 car.out: $(OBJ_UINT256) $(OBJ_SHA256) $(OBJ_SRC) 
-	$(CC) -o $@ $^ -L/usr/local/opt/openssl@3/lib -I/usr/local/opt/openssl@3/include -lcrypto
+	$(CC) -o $@ $^ $(LDFLAGS) $(CPPFLAGS) -lcrypto
 $(OBJ_SRC):		CXXFLAGS += -lcrypto
 $(OBJ_UINT256): CXXFLAGS += -fPIC
 $(OBJ_SHA256):	CXXFLAGS += -fPIC

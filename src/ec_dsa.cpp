@@ -118,14 +118,8 @@ static std::pair<uint256_t, uint256_t> scalar_mult(uint256_t k, std::pair<uint25
     return r0;
 }
 
-<<<<<<< Updated upstream
-
 std::pair<uint256_t, uint256_t> sign(std::string& message, uint256_t private_key) {
-    uint256_t hashed = hash_message(message);
-=======
-std::pair<uint256_t, uint256_t> sign(std::string& message, uint256_t& private_key) {
     uint256_t hashed = hash_message(message) % subgroup_order;
->>>>>>> Stashed changes
     uint256_t r = 0x0;
     uint256_t s = 0x0;
     while ((!r) || (!s)) {
