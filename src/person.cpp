@@ -59,11 +59,11 @@ int main() {
 	std::cout << "CLIENT: person received challenge: " << nonce << " " << r << " " << s << std::endl;
 	std::cout << handshake_response_msg;
 
-	uint256_t nonce_number = uint256_t(nonce);
+	uint256_t nonce_hash = hash_message(nonce);
 	uint256_t r_number = uint256_t(r);
 	uint256_t s_number = uint256_t(s);
 
-	bool is_verified = verify(nonce_number, make_pair(r_number, s_number), car_public_key);
+	bool is_verified = verify(nonce_hash, make_pair(r_number, s_number), car_public_key);
 
 	if (!is_verified) {
 		std::cout << "CLIENT: Challenge not verified" << std::endl;
@@ -71,7 +71,7 @@ int main() {
 		return ERROR;
 	}
 
-	std::pair<uint256_t, uint256_t> person_signature = sign(nonce_number, uint256_t(PERSON_PRIVATE_KEY));
+	std::pair<uint256_t, uint256_t> person_signature = sign(nonce_hash, uint256_t(PERSON_PRIVATE_KEY));
 	
     // decode handshake response
 

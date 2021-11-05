@@ -158,15 +158,16 @@ int main()
 		if (chapter == "handshake") {
 			std::cout << "SERVER: handshake handling" << std::endl;
 			user_sessions.insert(user_token);
-			std::string nonce = safe_random(uint256_1, uint256_max).str(16, 64);
-			std::string nonce_hash = hash_message(nonce).str(16, 64);
+			uint256_t nonce = safe_random(uint256_1, uint256_max).str(16, 64);
+			std::string nonce_message = nonce.str(16,64);
+			std::string nonce_hash = hash_message(nonce_message).str(16, 64);
 			std::pair<uint256_t, uint256_t> signature = sign(nonce_hash, uint256_t(CAR_PRIVATE_KEY));
 			std::string r = signature.first.str(16,64);
 			std::string s = signature.second.str(16,64);
 			std::cout << "R: " << r << std::endl;
 			std::cout << "S: " << s << std::endl;
 			std::string m = "{"
-							"\"nonce\": \"" + nonce_hash + "\","
+							"\"nonce\": \"" + nonce_message + "\","
 							"\"signature\": {"
 								"\"r\": \"" + r + "\"," 
 								"\"s\": \"" + s + "\""
