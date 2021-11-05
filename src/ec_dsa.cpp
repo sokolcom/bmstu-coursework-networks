@@ -17,8 +17,8 @@
 // #define CAR_PUBLIC_KEY_SECOND "0x51859ccdf5567141f640eeefae2eddc4e1b1696149d8564a9a4ae7f756f32dc7"
 
 
-const uint256_t field_modulo = FIELD_MODULO;
-const uint256_t subgroup_order = SUBGROUP_ORDER;
+const uint256_t field_modulo = uint256_t(FIELD_MODULO);
+const uint256_t subgroup_order = uint256_t(SUBGROUP_ORDER);
 std::pair<uint256_t, uint256_t> base_point = std::make_pair(BASE_POINT_X, BASE_POINT_Y);
 
 
@@ -31,7 +31,7 @@ uint256_t safe_random(const uint256_t a, const uint256_t b) {
 
     uint256_t x;
     x.from_bytes(buffer);
-    for (; (x < a) && (x > b); RAND_bytes(buffer, 32), x.from_bytes(buffer));
+    for (; (x < a) || (x > b); RAND_bytes(buffer, 32), x.from_bytes(buffer));
 
     const uint256_t modulo = FIELD_MODULO;
     return x % modulo;
@@ -43,9 +43,39 @@ uint256_t hash_message(const std::string& message) {
     return uint256_t(SHA256::toString(sha.digest()));
 }
 
-static uint256_t inverse_modulo(const uint256_t& x, const uint256_t& modulo) {
-    // Fermat's little theorem
+static uint256_t inverse_modulo(const uint256_t x, const uint256_t modulo) {
+    // // Fermat's little theorem
     return x.powmod(modulo - 2, modulo);
+    
+    // uint256_t s = 0, old_s = 1;
+    // uint256_t t = 1, old_t = 0;
+    // uint256_t r = modulo, old_r = x;
+
+    // while (r) {
+    //     uint256_t quotient = old_r / r;
+    //     uint256_t temp1, temp2;
+
+    //     temp1 = old_r;
+    //     old_r = r;
+    //     temp2 = quotient.mulmod(r, modulo);
+    //     r = (temp1 > temp2) ? (temp1 - temp2) : modulo - (temp2 - temp1);
+    //     // old_r, r = r, old_r - quotient * r;
+
+    //     temp1 = old_s;
+    //     old_s = s;
+    //     temp2 = quotient.mulmod(s, modulo);
+    //     s = (temp1 > temp2) ? (temp1 - temp2) : modulo - (temp2 - temp1);
+    //     // old_s, s = s, old_s - quotient * s;
+
+    //     temp1 = old_t;
+    //     old_t = t;
+    //     temp2 = quotient.mulmod(t, modulo);
+    //     s = (temp1 > temp2) ? (temp1 - temp2) : modulo - (temp2 - temp1);
+    //     // old_t, t = t, old_t - quotient * t;
+    // }
+
+    // uint256_t xxx = old_s;  // (x * k) % p == 1
+    // return xxx % modulo;
 }
 
 static std::pair<uint256_t, uint256_t> add(std::pair<uint256_t, uint256_t>& point_1, std::pair<uint256_t, uint256_t>& point_2) {
@@ -120,17 +150,26 @@ static std::pair<uint256_t, uint256_t> scalar_mult(uint256_t k, std::pair<uint25
 
 std::pair<uint256_t, uint256_t> sign(uint256_t hashed, uint256_t private_key) {
     hashed = hashed % subgroup_order;
+    // std::cout << "HASH % " << hashed.str(16, 64) << std::endl;
+
     uint256_t r = 0x0;
     uint256_t s = 0x0;
     while ((!r) || (!s)) {
         uint256_t k = safe_random(uint256_1, subgroup_order);
+        // std::cout << "rand_k: " << k.str(16, 64) << std::endl;
         std::pair<uint256_t, uint256_t> point = scalar_mult(k, base_point);
         r = point.first % subgroup_order;
 
         s = r.mulmod(private_key, subgroup_order);
+        // std::cout << "s1: " << s.str(16, 64) << std::endl;
         s = s.addmod(hashed, subgroup_order);
+        // std::cout << "s2: " << s.str(16, 64) << std::endl;
+        // std::cout << "rand_k: " << k.str(16, 64) << std::endl;
+        // std::cout << "PIZDEC: " << (k > subgroup_order) << std::endl;
         uint256_t temp = inverse_modulo(k, subgroup_order);
+        // std::cout << "temp " << temp.str(16, 64) << std::endl;
         s = s.mulmod(temp, subgroup_order);
+        // std::cout << "s3: " << s.str(16, 64) << std::endl;
         s = s % subgroup_order; // ((hashed + r * private_key) * inverse_modulo(k, subgroup_order)) % subgroup_order;
     }
 
@@ -172,16 +211,18 @@ bool verify(uint256_t hashed,
 //     uint256_t person_private_key = uint256_t(PERSON_PRIVATE_KEY);
 //     std::pair<uint256_t, uint256_t> car_public_key = std::make_pair(CAR_PUBLIC_KEY_FIRST, CAR_PUBLIC_KEY_SECOND);
 
-//     // uint256_t nonce = safe_random(uint256_1, uint256_max);
-//     // std::string message = nonce.str(16, 64);
-//     std::string message = "0x8f534c4449b93615f0f249ac06d7bc25efc4481b536b1d812d557b072713e5de";
-//     std::cout << message << '\n';
+//     uint256_t nonce = safe_random(uint256_1, uint256_max);
+//     std::string message = nonce.str(16, 64);
+//     // std::string message = "0x8f534c4449b93615f0f249ac06d7bc25efc4481b536b1d812d557b072713e5de";
+//     // std::cout << "HASH   " << message << '\n';
+//     uint256_t hashed = hash_message(message);
+//     std::cout << "HASH   " << hashed.str(16, 64) << '\n';
 
-//     std::pair<uint256_t, uint256_t> signature = sign(message, person_private_key);
+//     std::pair<uint256_t, uint256_t> signature = sign(hashed, person_private_key);
 //     std::cout << "HELLO VASYA\n";
 //     std::cout << "SIGNATURE\n";
 
-//     // uint256_t a = person_private_key % subgroup_order;
+//     // uint256_t a = car_public_key.first % subgroup_order;
 //     // uint256_t inv = inverse_modulo(a, subgroup_order);
 //     // std::cout << inv.str(16, 64) << '\n';
 
@@ -193,7 +234,7 @@ bool verify(uint256_t hashed,
 //     // uint256_t xx = x, yy = y;
 //     // std::pair<uint256_t, uint256_t> signature = std::make_pair(x, y);
 
-//     bool result = verify(message, signature, car_public_key);
+//     bool result = verify(hashed, signature, car_public_key);
 //     std::cout << "Result is..... " << result << "!!!!!\n";
 
 //     return 0;
