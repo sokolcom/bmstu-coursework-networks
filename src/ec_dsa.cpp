@@ -152,7 +152,7 @@ static std::pair<uint256_t, uint256_t> scalar_mult(uint256_t k, std::pair<uint25
 
 std::pair<uint256_t, uint256_t> sign(uint256_t hashed, uint256_t private_key) {
     hashed = hashed % subgroup_order;
-    std::cout << "PIZDEC TOTAL': " << (private_key > subgroup_order) << std::endl;
+    // std::cout << "PIZDEC TOTAL': " << (private_key > subgroup_order) << std::endl;
     // private_key = private_key % subgroup_order;
     // std::cout << "HASH % " << hashed.str(16, 64) << std::endl;
 
@@ -160,20 +160,20 @@ std::pair<uint256_t, uint256_t> sign(uint256_t hashed, uint256_t private_key) {
     uint256_t s = 0x0;
     while ((!r) || (!s)) {
         uint256_t k = safe_random(uint256_1, subgroup_order);
-        std::cout << "rand_k: " << k.str(16, 64) << std::endl;
+        // std::cout << "rand_k: " << k.str(16, 64) << std::endl;
         std::pair<uint256_t, uint256_t> point = scalar_mult(k, base_point);
         r = point.first % subgroup_order;
 
         s = r.mulmod(private_key, subgroup_order);
-        std::cout << "s1: " << s.str(16, 64) << std::endl;
+        // std::cout << "s1: " << s.str(16, 64) << std::endl;
         s = s.addmod(hashed, subgroup_order);
-        std::cout << "s2: " << s.str(16, 64) << std::endl;
-        std::cout << "rand_k: " << k.str(16, 64) << std::endl;
-        std::cout << "PIZDEC: " << (k > subgroup_order) << std::endl;
+        // std::cout << "s2: " << s.str(16, 64) << std::endl;
+        // std::cout << "rand_k: " << k.str(16, 64) << std::endl;
+        // std::cout << "PIZDEC: " << (k > subgroup_order) << std::endl;
         uint256_t temp = inverse_modulo(k, subgroup_order);
-        std::cout << "temp " << temp.str(16, 64) << std::endl;
+        // std::cout << "temp " << temp.str(16, 64) << std::endl;
         s = s.mulmod(temp, subgroup_order);
-        std::cout << "s3: " << s.str(16, 64) << std::endl;
+        // std::cout << "s3: " << s.str(16, 64) << std::endl;
         s = s % subgroup_order; // ((hashed + r * private_key) * inverse_modulo(k, subgroup_order)) % subgroup_order;
     }
 

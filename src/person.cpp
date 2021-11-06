@@ -52,24 +52,24 @@ int main() {
     }
 
     std::string handshake_response_msg = std::string(message);
-	std::cout << "CLIENT: handshake message - " << handshake_response_msg << std::endl;
+	// std::cout << "CLIENT: handshake message - " << handshake_response_msg << std::endl;
     auto js = nlohmann::json::parse(handshake_response_msg);
 	std::string nonce = js.at("nonce");
 	std::string r = js.at("signature").at("r");
 	std::string s = js.at("signature").at("s");
-	std::cout << "CLIENT: person received challenge" << std::endl;
-	std::cout << "CLIENT: nonce - " << nonce << std::endl;
-	std::cout << "CLIENT: R - " << r << std::endl;
-	std::cout << "CLIENT: S - " << s << std::endl;
+	// std::cout << "CLIENT: person received challenge" << std::endl;
+	// std::cout << "CLIENT: nonce - " << nonce << std::endl;
+	// std::cout << "CLIENT: R - " << r << std::endl;
+	// std::cout << "CLIENT: S - " << s << std::endl;
 
 	uint256_t nonce_number = uint256_t(nonce);
 	uint256_t nonce_hash = hash_message(nonce_number);
-	std::cout << "CLIENT nonce_hash - " << nonce_hash.str(16,64) << std::endl;
+	// std::cout << "CLIENT nonce_hash - " << nonce_hash.str(16,64) << std::endl;
 	std::cout << nonce_hash << std::endl;
 	uint256_t r_number = uint256_t(r);
 	uint256_t s_number = uint256_t(s);
-	std::cout << "CLIENT public key first - " << car_public_key.first.str(16,64) << std::endl;
-	std::cout << "CLIENT public key second - " << car_public_key.second.str(16,64) << std::endl;
+	// std::cout << "CLIENT public key first - " << car_public_key.first.str(16,64) << std::endl;
+	// std::cout << "CLIENT public key second - " << car_public_key.second.str(16,64) << std::endl;
 
 	bool is_verified = verify(nonce_hash, make_pair(r_number, s_number), car_public_key);
 

@@ -36,7 +36,7 @@
 
 using namespace std;
 
-std::set<std::string> user_tokens = { "666" };
+std::set<std::string> user_tokens = { "777" };
 std::set<std::string> user_sessions = {};
 
 void perror_and_exit(std::string err_msg, size_t exit_code)
@@ -48,13 +48,13 @@ void perror_and_exit(std::string err_msg, size_t exit_code)
 int accept_connection(int listener, struct sockaddr_in client_addr) {
 	int sock;
 	socklen_t cli_addr_size = sizeof(client_addr);
-	std::cout << "here1" << std::endl;
+	// std::cout << "here1" << std::endl;
 	sock = accept(listener, (struct sockaddr*) &client_addr, &cli_addr_size);
 	if(sock < 0) {
-		std::cout << "here4334" << std::endl;
+		// std::cout << "here4334" << std::endl;
 		perror_and_exit("accept()", 3);
 	}
-	std::cout << "here2" << std::endl;
+	// std::cout << "here2" << std::endl;
 	return sock;
 }
 
@@ -72,25 +72,25 @@ bool is_session_exist(std::string auth_token) {
 	auto search = user_sessions.find(auth_token);
 
 	if (search != user_sessions.end()) {
-		std::cout << "session exists" << std::endl;
+		std::cout << "SERVER: session exists" << std::endl;
 		return true;
 	}
 
-	std::cout << "session not exists" << std::endl;
+	std::cout << "SERVER: session not exists" << std::endl;
 	return false;
 }
 
-bool is_chapter_correct(std::string auth_token, std::string chapter) {
+bool is_stage_correct(std::string auth_token, std::string stage) {
 	bool session_exists = is_session_exist(auth_token);
-	if (chapter == "handshake" && !session_exists) {
-		std::cout << "handhake chapter correct" << std::endl;
+	if (stage == "handshake" && !session_exists) {
+		std::cout << "SERVER: handhake stage correct" << std::endl;
 		return true;
-	} else if (chapter == "response" && session_exists) {
-		std::cout << "response chapter correct" << std::endl;
+	} else if (stage == "response" && session_exists) {
+		std::cout << "SERVER: response stage correct" << std::endl;
 		return true;
 	}
 	
-	std::cout << "chapter failed" << std::endl;
+	std::cout << "SERVER: stage failed" << std::endl;
 	return false;
 }
 
@@ -123,7 +123,7 @@ int main()
 		bytes_read = recv(sock, buf, MSG_LEN, 0);
 		if (bytes_read < 0)
 		{
-			std::cout << "here3 " << bytes_read << std::endl;
+			// std::cout << "here3 " << bytes_read << std::endl;
 			printf("SERVER: Recv failed");
 			close(sock);
 			is_executing = false;
@@ -131,20 +131,20 @@ int main()
 		}
 		if (bytes_read == 0)
 		{
-			std::cout << "here4" << std::endl;
+			// std::cout << "here4" << std::endl;
 			puts("SERVER: Client disconnected upexpectedly.");
 			close(sock);
 			accept_connection(listener, client_addr);
 			continue ;
 		}
 		buf[bytes_read] = '\0';
-		cout << "buf" << buf << "\n";
+		// cout << "buf" << buf << "\n";
 		char tst[MSG_LEN];
 		strcpy(tst, buf);
 		std::string message = std::string(buf);
 		nlohmann::json js = nlohmann::json::parse(message);
 		std::string user_token = js.at("auth_token");
-		std::string chapter = js.at("chapter");
+		std::string stage = js.at("stage");
 	
 		if (!is_user_authorized(user_token)) {
 			puts("SERVER: Not authorized");
@@ -153,27 +153,27 @@ int main()
 			continue;
 		}
 
-		if (!is_chapter_correct(user_token, chapter)) {
-			puts("SERVER: Invalid chapter");
-			std::cout << chapter << std::endl;
+		if (!is_stage_correct(user_token, stage)) {
+			puts("SERVER: Invalid stage");
+			std::cout << stage << std::endl;
 			close(sock);
 			accept_connection(listener, client_addr);
 			continue;
 		}
 
-		if (chapter == "handshake") {
+		if (stage == "handshake") {
 			std::cout << "SERVER: handshake handling" << std::endl;
 			user_sessions.insert(user_token);
 			uint256_t nonce = safe_random(uint256_1, uint256_max);
 			std::string nonce_message = nonce.str(16,64);
 			uint256_t nonce_hash = hash_message(nonce);
-			std::cout << "SERVER nonce_hash - " << nonce_hash.str(16, 64) << std::endl;
+			// std::cout << "SERVER nonce_hash - " << nonce_hash.str(16, 64) << std::endl;
 			std::pair<uint256_t, uint256_t> signature = sign(nonce_hash, uint256_t(CAR_PRIVATE_KEY));
 			std::string r = signature.first.str(16,64);
 			std::string s = signature.second.str(16,64);
-			std::cout << "SERVER nonce(10th) - " << nonce_message << std::endl;
-			std::cout << "SERVER R - " << r << std::endl;
-			std::cout << "SERVER S - " << s << std::endl;
+			// std::cout << "SERVER nonce(10th) - " << nonce_message << std::endl;
+			// std::cout << "SERVER R - " << r << std::endl;
+			// std::cout << "SERVER S - " << s << std::endl;
 
 			nlohmann::json js_norm = {
 				{"nonce", nonce_message},
@@ -186,7 +186,7 @@ int main()
 			//bool is_verified = verify(nonce_hash, make_pair(signature.first, signature.second), make_pair(uint256_t(CAR_PUBLIC_KEY_FIRST), uint256_t(CAR_PUBLIC_KEY_SECOND)));
 			//std::cout << "HUYNYA - " << is_verified << std::endl;
 			send(sock, m.c_str(), m.size(), 0);
-		} else if (chapter == "response") {
+		} else if (stage == "response") {
 			std::cout << "SERVER: response handling" << std::endl;
 			for(auto it = user_sessions.begin(); it != user_sessions.end(); ) {
 				if(*it == user_token) {
@@ -227,7 +227,7 @@ int main()
 			accept_connection(listener, client_addr);
 			continue;
 		} else {
-			puts("SERVER: Invalid chapter");
+			puts("SERVER: Invalid stage");
 			close(sock);
 			accept_connection(listener, client_addr);
 			continue;
