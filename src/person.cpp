@@ -13,7 +13,7 @@
 #include "../include/ec_dsa.h"
 
 #define PORT 8888
-#define MSG_LEN 1024
+#define MSG_LEN 2048
 #define ERROR 1
 #define PERSON_PRIVATE_KEY "0x631ee57d7cb6801890415ccc4622a12ddc0d0025ef087ce0e2798941473d142"
 #define CAR_PUBLIC_KEY_FIRST "0x7630498e5e4df030aedb1b0ea44ee1ce2a323427aaf2a959d9d31e39da843361"
@@ -24,7 +24,7 @@ using namespace std;
 
 int main() {
     uint256_t person_private_key = uint256_t(PERSON_PRIVATE_KEY);
-    pair<uint256_t, uint256_t> car_public_key = make_pair(CAR_PUBLIC_KEY_FIRST, CAR_PUBLIC_KEY_SECOND);
+    pair<uint256_t, uint256_t> car_public_key = make_pair(uint256_t(CAR_PUBLIC_KEY_FIRST), uint256_t(CAR_PUBLIC_KEY_SECOND));
 
     int person_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     
@@ -51,17 +51,25 @@ int main() {
         return ERROR;
     }
 
-    std::string handshake_response_msg = std::string(message); 
+    std::string handshake_response_msg = std::string(message);
+	std::cout << "CLIENT: handshake message - " << handshake_response_msg << std::endl;
     auto js = nlohmann::json::parse(handshake_response_msg);
 	std::string nonce = js.at("nonce");
 	std::string r = js.at("signature").at("r");
 	std::string s = js.at("signature").at("s");
-	std::cout << "CLIENT: person received challenge: " << nonce << " " << r << " " << s << std::endl;
-	std::cout << handshake_response_msg;
+	std::cout << "CLIENT: person received challenge" << std::endl;
+	std::cout << "CLIENT: nonce - " << nonce << std::endl;
+	std::cout << "CLIENT: R - " << r << std::endl;
+	std::cout << "CLIENT: S - " << s << std::endl;
 
-	uint256_t nonce_hash = hash_message(nonce);
+	uint256_t nonce_number = uint256_t(nonce);
+	uint256_t nonce_hash = hash_message(nonce_number);
+	std::cout << "CLIENT nonce_hash - " << nonce_hash.str(16,64) << std::endl;
+	std::cout << nonce_hash << std::endl;
 	uint256_t r_number = uint256_t(r);
 	uint256_t s_number = uint256_t(s);
+	std::cout << "CLIENT public key first - " << car_public_key.first.str(16,64) << std::endl;
+	std::cout << "CLIENT public key second - " << car_public_key.second.str(16,64) << std::endl;
 
 	bool is_verified = verify(nonce_hash, make_pair(r_number, s_number), car_public_key);
 

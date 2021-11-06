@@ -15,6 +15,8 @@
 // #define PERSON_PRIVATE_KEY "0x631ee57d7cb6801890415ccc4622a12ddc0d0025ef087ce0e2798941473d142"
 // #define CAR_PUBLIC_KEY_FIRST "0x7630498e5e4df030aedb1b0ea44ee1ce2a323427aaf2a959d9d31e39da843361"
 // #define CAR_PUBLIC_KEY_SECOND "0x51859ccdf5567141f640eeefae2eddc4e1b1696149d8564a9a4ae7f756f32dc7"
+#define CAR_PUBLIC_KEY_FIRST "0x7630498e5e4df030aedb1b0ea44ee1ce2a323427aaf2a959d9d31e39da843361"
+#define CAR_PUBLIC_KEY_SECOND "0x51859ccdf5567141f640eeefae2eddc4e1b1696149d8564a9a4ae7f756f32dc7"
 
 
 const uint256_t field_modulo = uint256_t(FIELD_MODULO);
@@ -37,9 +39,9 @@ uint256_t safe_random(const uint256_t a, const uint256_t b) {
     return x % modulo;
 }
 
-uint256_t hash_message(const std::string& message) {
+uint256_t hash_message(const uint256_t number) {
 	SHA256 sha;
-	sha.update(message);
+	sha.update(number.str(16,64));
     return uint256_t(SHA256::toString(sha.digest()));
 }
 
@@ -150,26 +152,28 @@ static std::pair<uint256_t, uint256_t> scalar_mult(uint256_t k, std::pair<uint25
 
 std::pair<uint256_t, uint256_t> sign(uint256_t hashed, uint256_t private_key) {
     hashed = hashed % subgroup_order;
+    std::cout << "PIZDEC TOTAL': " << (private_key > subgroup_order) << std::endl;
+    private_key = private_key % subgroup_order;
     // std::cout << "HASH % " << hashed.str(16, 64) << std::endl;
 
     uint256_t r = 0x0;
     uint256_t s = 0x0;
     while ((!r) || (!s)) {
         uint256_t k = safe_random(uint256_1, subgroup_order);
-        // std::cout << "rand_k: " << k.str(16, 64) << std::endl;
+        std::cout << "rand_k: " << k.str(16, 64) << std::endl;
         std::pair<uint256_t, uint256_t> point = scalar_mult(k, base_point);
         r = point.first % subgroup_order;
 
         s = r.mulmod(private_key, subgroup_order);
-        // std::cout << "s1: " << s.str(16, 64) << std::endl;
+        std::cout << "s1: " << s.str(16, 64) << std::endl;
         s = s.addmod(hashed, subgroup_order);
-        // std::cout << "s2: " << s.str(16, 64) << std::endl;
-        // std::cout << "rand_k: " << k.str(16, 64) << std::endl;
-        // std::cout << "PIZDEC: " << (k > subgroup_order) << std::endl;
+        std::cout << "s2: " << s.str(16, 64) << std::endl;
+        std::cout << "rand_k: " << k.str(16, 64) << std::endl;
+        std::cout << "PIZDEC: " << (k > subgroup_order) << std::endl;
         uint256_t temp = inverse_modulo(k, subgroup_order);
-        // std::cout << "temp " << temp.str(16, 64) << std::endl;
+        std::cout << "temp " << temp.str(16, 64) << std::endl;
         s = s.mulmod(temp, subgroup_order);
-        // std::cout << "s3: " << s.str(16, 64) << std::endl;
+        std::cout << "s3: " << s.str(16, 64) << std::endl;
         s = s % subgroup_order; // ((hashed + r * private_key) * inverse_modulo(k, subgroup_order)) % subgroup_order;
     }
 
