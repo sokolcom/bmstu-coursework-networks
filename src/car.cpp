@@ -25,12 +25,13 @@
 
 //55406959067906966216185922075165173647310218242524135206265003447211541460366
 
-#define ROOT "/Users/vlad/Downloads/coursework-networks"
+// #define ROOT "/Users/vlad/Downloads/coursework-networks"
 #define CAR_PRIVATE_KEY "0x2572c1e1fc6f2f517e6dffc867b8d6abc3c920b28eaf8a8ec7c33e38c58d04"
-#define PERSON_PUBLIC_KEY_FIRST "0x5085c9e4f84d48d3d1f93e2c8511994c572b3a5baabe5834e0093f971aa0f891"
-#define PERSON_PUBLIC_KEY_SECOND "0x66cba7d26a1ee0b05541193967470a4d5b5bce4e643c41af98d38698096bba43"
-#define CAR_PUBLIC_KEY_FIRST "0x7630498e5e4df030aedb1b0ea44ee1ce2a323427aaf2a959d9d31e39da843361"
-#define CAR_PUBLIC_KEY_SECOND "0x51859ccdf5567141f640eeefae2eddc4e1b1696149d8564a9a4ae7f756f32dc7"
+#define CAR_PUBLIC_KEY_FIRST "0x5085c9e4f84d48d3d1f93e2c8511994c572b3a5baabe5834e0093f971aa0f891"
+#define CAR_PUBLIC_KEY_SECOND "0x66cba7d26a1ee0b05541193967470a4d5b5bce4e643c41af98d38698096bba43"
+
+#define PERSON_PUBLIC_KEY_FIRST "0x7630498e5e4df030aedb1b0ea44ee1ce2a323427aaf2a959d9d31e39da843361"
+#define PERSON_PUBLIC_KEY_SECOND "0x51859ccdf5567141f640eeefae2eddc4e1b1696149d8564a9a4ae7f756f32dc7"
 
 
 using namespace std;
@@ -201,12 +202,13 @@ int main()
 			std::string s = js.at("signature").at("s");
 
 			uint256_t nonce_number = uint256_t(nonce);
+
 			uint256_t r_number = uint256_t(r);
 			uint256_t s_number = uint256_t(s);
 
 			pair<uint256_t, uint256_t> person_public_key = make_pair(PERSON_PUBLIC_KEY_FIRST, PERSON_PUBLIC_KEY_SECOND);
 			
-			bool is_verified = verify(nonce_number, make_pair(r_number, s_number), person_public_key);
+			bool is_verified = verify(hash_message(nonce_number), make_pair(r_number, s_number), person_public_key);
 
 			std::string result;
 			if (is_verified) {

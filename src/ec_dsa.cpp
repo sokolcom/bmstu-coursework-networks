@@ -12,7 +12,7 @@
 #include "../sha256/include/SHA256.h"
 
 
-// #define PERSON_PRIVATE_KEY "0x631ee57d7cb6801890415ccc4622a12ddc0d0025ef087ce0e2798941473d142"
+#define PERSON_PRIVATE_KEY "0x631ee57d7cb6801890415ccc4622a12ddc0d0025ef087ce0e2798941473d142"
 // #define CAR_PUBLIC_KEY_FIRST "0x7630498e5e4df030aedb1b0ea44ee1ce2a323427aaf2a959d9d31e39da843361"
 // #define CAR_PUBLIC_KEY_SECOND "0x51859ccdf5567141f640eeefae2eddc4e1b1696149d8564a9a4ae7f756f32dc7"
 #define CAR_PUBLIC_KEY_FIRST "0x7630498e5e4df030aedb1b0ea44ee1ce2a323427aaf2a959d9d31e39da843361"
@@ -153,7 +153,7 @@ static std::pair<uint256_t, uint256_t> scalar_mult(uint256_t k, std::pair<uint25
 std::pair<uint256_t, uint256_t> sign(uint256_t hashed, uint256_t private_key) {
     hashed = hashed % subgroup_order;
     std::cout << "PIZDEC TOTAL': " << (private_key > subgroup_order) << std::endl;
-    private_key = private_key % subgroup_order;
+    // private_key = private_key % subgroup_order;
     // std::cout << "HASH % " << hashed.str(16, 64) << std::endl;
 
     uint256_t r = 0x0;
@@ -211,35 +211,24 @@ bool verify(uint256_t hashed,
 //     // std::cout << (sss.second).str(16, 64) << '\n';
 
 
-
 //     uint256_t person_private_key = uint256_t(PERSON_PRIVATE_KEY);
 //     std::pair<uint256_t, uint256_t> car_public_key = std::make_pair(CAR_PUBLIC_KEY_FIRST, CAR_PUBLIC_KEY_SECOND);
 
 //     uint256_t nonce = safe_random(uint256_1, uint256_max);
-//     std::string message = nonce.str(16, 64);
-//     // std::string message = "0x8f534c4449b93615f0f249ac06d7bc25efc4481b536b1d812d557b072713e5de";
-//     // std::cout << "HASH   " << message << '\n';
-//     uint256_t hashed = hash_message(message);
+//     uint256_t hashed = hash_message(nonce);
 //     std::cout << "HASH   " << hashed.str(16, 64) << '\n';
 
 //     std::pair<uint256_t, uint256_t> signature = sign(hashed, person_private_key);
 //     std::cout << "HELLO VASYA\n";
 //     std::cout << "SIGNATURE\n";
-
-//     // uint256_t a = car_public_key.first % subgroup_order;
-//     // uint256_t inv = inverse_modulo(a, subgroup_order);
-//     // std::cout << inv.str(16, 64) << '\n';
-
-
 //     std::cout << signature.first.str(16, 64) << '\n';
 //     std::cout << signature.second.str(16, 64) << "\n\n";
-//     // std::string x = "0x3b4a2a4b70469efb625f7ad50abdf25a784690740c6ad49e75699981c8e79b9", y = "0xfb6f0e2c71bd2fcb7f756e9f6300a553522ed706ffe6c34d087090543ddd452";
-//     // std::string x = "0xcaf1369c602bcc0bf4489b18b459dc29e375faf50c51f28b16b952881b12743", y = "0x1c7aa2259d7b3a31b4ee92a6ef08bd0a9701f8fb0d9a6970a894f834c163323";
-//     // uint256_t xx = x, yy = y;
-//     // std::pair<uint256_t, uint256_t> signature = std::make_pair(x, y);
 
 //     bool result = verify(hashed, signature, car_public_key);
 //     std::cout << "Result is..... " << result << "!!!!!\n";
 
+//      // uint256_t a = car_public_key.first % subgroup_order;
+//     // uint256_t inv = inverse_modulo(a, subgroup_order);
+//     // std::cout << inv.str(16, 64) << '\n';
 //     return 0;
 // }

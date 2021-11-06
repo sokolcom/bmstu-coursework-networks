@@ -1,5 +1,5 @@
 CC = g++
-CXXFLAGS = -std=c++11 #-Wall -Werror
+CXXFLAGS = -std=c++11 -Wall -Werror
 
 
 SRC_UINT256 = $(wildcard uint256_t/*.cpp)

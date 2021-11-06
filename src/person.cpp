@@ -16,14 +16,14 @@
 #define MSG_LEN 2048
 #define ERROR 1
 #define PERSON_PRIVATE_KEY "0x631ee57d7cb6801890415ccc4622a12ddc0d0025ef087ce0e2798941473d142"
-#define CAR_PUBLIC_KEY_FIRST "0x7630498e5e4df030aedb1b0ea44ee1ce2a323427aaf2a959d9d31e39da843361"
-#define CAR_PUBLIC_KEY_SECOND "0x51859ccdf5567141f640eeefae2eddc4e1b1696149d8564a9a4ae7f756f32dc7"
+#define CAR_PUBLIC_KEY_FIRST "0x5085c9e4f84d48d3d1f93e2c8511994c572b3a5baabe5834e0093f971aa0f891"
+#define CAR_PUBLIC_KEY_SECOND "0x66cba7d26a1ee0b05541193967470a4d5b5bce4e643c41af98d38698096bba43"
 #define USER_TOKEN "666"
 
 using namespace std;
 
 int main() {
-    uint256_t person_private_key = uint256_t(PERSON_PRIVATE_KEY);
+    // uint256_t person_private_key = uint256_t(PERSON_PRIVATE_KEY);
     pair<uint256_t, uint256_t> car_public_key = make_pair(uint256_t(CAR_PUBLIC_KEY_FIRST), uint256_t(CAR_PUBLIC_KEY_SECOND));
 
     int person_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -41,7 +41,7 @@ int main() {
         return ERROR;
     }
 
-    char message[MSG_LEN];
+    char message[MSG_LEN] = { 0 };
 	std::string handshake_message = "{\"auth_token\": \"" + std::string(USER_TOKEN) + "\", \"chapter\": \"handshake\"}";
     const char *handhake_c_string = handshake_message.c_str();
 	sendto(person_socket, handhake_c_string, strlen(handhake_c_string), 0, (struct sockaddr*) &server_addr, sizeof(server_addr));
@@ -83,8 +83,7 @@ int main() {
 	
     // decode handshake response
 
-	char new_message[MSG_LEN];
-
+	char new_message[MSG_LEN] = { 0 };
 	std::string response_message = "{"
 									"\"auth_token\": \"" + std::string(USER_TOKEN) + "\","
 									"\"chapter\": \"response\","
